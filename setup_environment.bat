@@ -1,19 +1,30 @@
 @echo off
-echo Setting up PowerVerse project environment...
+set PYTHON_VERSION=3.10
 
-echo Creating virtual environment...
-python -m venv venv
+:: Check if Python 3.10 is installed
+where python3.10 >nul 2>nul
+if %errorlevel% neq 0 (
+    echo Python 3.10 is not installed. Please install it first.
+    exit /b
+)
 
-echo Activating virtual environment...
+:: Set up virtual environment with Python 3.10
+python3.10 -m venv venv
+
+:: Activate virtual environment
 call venv\Scripts\activate.bat
 
-echo Installing dependencies...
-pip install -r requirements.txt
+:: Install dependencies
+python -m pip install --upgrade pip setuptools wheel
+pip install --prefer-binary -r requirements.txt
 
-echo Setting up spaCy language model...
+:: Set up spaCy language model
 python -m spacy download en_core_web_sm
 
-echo Environment setup complete!
+:: Environment setup complete!
+echo Install Microsoft Visual C++ Build Tools from:
+echo https://visualstudio.microsoft.com/visual-cpp-build-tools/
+echo Then restart this setup script after installation
 echo.
 echo To activate the environment in the future, run: venv\Scripts\activate.bat
 echo To start the Jupyter notebook, run: jupyter notebook notebooks\marvel_analysis.ipynb

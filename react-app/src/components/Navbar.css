@@ -1,0 +1,41 @@
+.navbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 2rem;
+  background-color: rgba(10, 25, 47, 0.85); /* Dark blue, semi-transparent */
+  border-bottom: 1px solid #00aeff; /* Neon blue border */
+  backdrop-filter: blur(5px);
+}
+
+.navbar-brand {
+  color: #e6f1ff; /* Light blue/white */
+  font-size: 1.5rem;
+  font-weight: bold;
+  text-decoration: none;
+  text-shadow: 0 0 5px #00aeff;
+}
+
+.navbar-nav {
+  list-style: none;
+  display: flex;
+  margin: 0;
+  padding: 0;
+}
+
+.nav-item {
+  margin-left: 1.5rem;
+}
+
+.nav-link {
+  color: #a8b2d1; /* Lighter grey-blue */
+  text-decoration: none;
+  font-size: 1rem;
+  transition: color 0.3s ease, text-shadow 0.3s ease;
+}
+
+.nav-link:hover,
+.nav-link.active { /* Add active class styling later if needed */
+  color: #64ffda; /* Neon teal/cyan */
+  text-shadow: 0 0 8px #64ffda;
+}
