@@ -15,6 +15,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Setup.py for package installation
 - .gitignore file for version control
 - CHANGELOG.md for tracking project changes
+- Gamified UI: Added a Mini-Game component for predicting Marvel characters by their powers on the Home page
 
 ### To Do
 - Implement React frontend components

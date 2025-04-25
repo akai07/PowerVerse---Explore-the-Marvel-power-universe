@@ -1,6 +1,7 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
 import './App.css';
+import MiniGame from "./MiniGame";
 
 // Import pages (these would be created in separate files)
 const Home = () => (
@@ -49,6 +50,7 @@ const Home = () => (
         similarity, and network analysis for character relationships.
       </p>
     </div>
+    <MiniGame />
   </div>
 );
 
@@ -57,7 +59,9 @@ const CharacterExplorer = () => (
   <div className="container mx-auto px-4 py-8">
     <h1 className="text-3xl font-bold mb-6">Character Explorer</h1>
     <p className="mb-4">Search and filter Marvel characters:</p>
-    
+    <div className="flex justify-center mb-6">
+      <img src="/images/public_domain_superhero.svg" alt="Public Domain Superhero" width="120" height="120" style={{marginBottom: '1rem'}} />
+    </div>
     <div className="mb-6">
       <input 
         type="text" 
