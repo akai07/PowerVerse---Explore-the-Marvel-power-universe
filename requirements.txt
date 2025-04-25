@@ -1,0 +1,19 @@
+# Data Science Dependencies
+numpy==1.24.3
+pandas==2.0.2
+scikit-learn==1.3.0
+matplotlib==3.7.2
+seaborn==0.12.2
+networkx==3.1
+wordcloud==1.9.2
+plotly==5.15.0
+jupyter==1.0.0
+notebook==6.5.4
+spacy==3.6.1
+
+# NLP
+en-core-web-sm @ https://github.com/explosion/spacy-models/releases/download/en_core_web_sm-3.6.0/en_core_web_sm-3.6.0-py3-none-any.whl
+
+# Utilities
+tqdm==4.65.0
+python-dotenv==1.0.0
