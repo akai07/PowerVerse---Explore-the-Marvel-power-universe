@@ -2,16 +2,26 @@
 
 This project dives into a dataset of Marvel characters to explore their powers, roles, and affiliations using Data Science techniques like NLP, clustering, classification, and network analysis. Additionally, a React-based interactive frontend helps users visualize and interact with the Marvel character universe.
 
+## ✨ New Feature: Power Predictor
+
+The Power Predictor feature allows users to:
+
+- Explore Marvel characters with their images and details
+- View estimated power levels for each character on a scale of 1-10
+- Create custom characters by adjusting power attributes
+- Compare power levels between different characters
+- Access official Marvel character information via direct links
+
 ## 📦 Dataset Overview
 
-The dataset contains information about 45 Marvel characters with the following columns:
+The project now uses an enhanced Marvel dataset with the following columns:
 
-- **Character**: Marvel character name (e.g., Iron Man)
-- **Real Name**: True identity (e.g., Tony Stark)
-- **Affiliation**: Group/Team (e.g., Avengers, X-Men)
-- **Powers**: List of powers in string format
-- **Role**: Hero, Villain, or Anti-Hero
-- **Power Level**: Initially all 'Low', augmented through analysis
+- **Alias**: Character's real name (e.g., Tony Stark)
+- **Superhero Identity**: Superhero name (e.g., Iron Man)
+- **Hero/Villain**: Character alignment
+- **Image URL**: Link to character image
+- **Info URL**: Link to official Marvel character page
+- **Power Level**: Estimated on a scale of 1-10 using our prediction model
 
 ## 🧠 Project Objectives
 
@@ -43,10 +53,24 @@ Includes:
 ```
 powerverse/
 ├── data/
-│   └── marvel_characters_dataset.csv
+│   ├── marvel_characters_dataset.csv
+│   └── Marvels - 2 (1).csv       # Enhanced dataset with images and info URLs
 ├── notebooks/
 │   └── marvel_analysis.ipynb
+├── react-app/                    # Frontend React application
+│   ├── public/                   # Static files
+│   └── src/                      # React source code
+│       ├── components/           # Reusable UI components
+│       │   ├── CharacterCard.jsx # Character display component
+│       │   └── CharacterCard.css # Styling for character cards
+│       └── pages/                # Application pages
+│           ├── PredictorPage.jsx # Power Predictor feature
+│           └── PredictorPage.css # Styling for Power Predictor
 ├── src/
+│   ├── api.py                    # Flask API with Power Predictor endpoints
+│   ├── models/
+│   │   ├── power_predictor.py    # Power level prediction model
+│   │   └── role_predictor.py     # Character role prediction model
 │   ├── preprocessing/
 │   ├── models/
 │   ├── visualization/

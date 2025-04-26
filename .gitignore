@@ -39,3 +39,6 @@ new_file.txt
 
 src/.venv/
 venv/
+backend_env/
+env/
+akai.txt

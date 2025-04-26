@@ -1,5 +1,15 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios'; // Import axios
+import axios from 'axios';
+import CharacterCard from '../components/CharacterCard';
+import BackendStatus from '../components/BackendStatus';
+import './ExplorerPage.css';
+
+// Get API URL from window object or localStorage
+const getApiUrl = () => {
+  return window.REACT_APP_API_URL || `http://localhost:${window.localStorage.getItem('BACKEND_PORT') || '8000'}`;
+};
+
+const API_URL = getApiUrl();
 
 function ExplorerPage() {
   const [characters, setCharacters] = useState([]);
@@ -8,7 +18,7 @@ function ExplorerPage() {
 
   useEffect(() => {
     // Fetch data from the backend API
-    axios.get('http://localhost:5001/api/characters') // Use the correct backend URL
+    axios.get(`${API_URL}/api/characters`)
       .then(response => {
         setCharacters(response.data);
         setLoading(false);
@@ -18,27 +28,33 @@ function ExplorerPage() {
         setError('Failed to load character data. Please try again later.');
         setLoading(false);
       });
-  }, []); // Empty dependency array ensures this runs only once on mount
+  }, [API_URL]); // Add API_URL to dependency array
 
   return (
     <div className="page-container explorer-page">
-      <h1>Character Explorer</h1>
-      <p>Dive deep into the details of Marvel characters and their powers.</p>
+      <BackendStatus />
+      <div className="explorer-header">
+        <h1>Character Explorer</h1>
+        <p>Dive deep into the details of Marvel characters and their powers.</p>
+      </div>
       
-      {loading && <p>Loading character data...</p>}
-      {error && <p style={{ color: 'red' }}>{error}</p>}
+      {loading && <div className="loading-state">Loading character data...</div>}
+      {error && <div className="error-state">{error}</div>}
       
       {!loading && !error && (
-        <div className="character-list">
-          {/* Display character data here - basic example */} 
+        <div className="character-grid">
           {characters.length > 0 ? (
-            <ul>
-              {characters.map((char, index) => (
-                <li key={index}>{char.Character} ({char['Real Name']}) - {char.Powers}</li>
-              ))}
-            </ul>
+            characters.map((char, index) => (
+              <CharacterCard
+                key={index}
+                character={char}
+                powerLevel={char.PowerLevel || 5}
+                showPower={true}
+                className="explorer-character-card"
+              />
+            ))
           ) : (
-            <p>No character data available.</p>
+            <div className="no-data-state">No character data available.</div>
           )}
         </div>
       )}
@@ -47,4 +63,3 @@ function ExplorerPage() {
 }
 
 export default ExplorerPage;
-axios.get('http://localhost:5001/api/characters') // Use the correct backend URL

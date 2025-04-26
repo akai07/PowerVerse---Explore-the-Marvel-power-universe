@@ -1,9 +1,10 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import './App.css'; // Keep global styles
+import './App.css';
 
 // Import Components
 import Navbar from './components/Navbar';
+import PortSelector from './components/PortSelector';
 
 // Import Pages
 import HomePage from './pages/HomePage';
@@ -11,25 +12,33 @@ import ExplorerPage from './pages/ExplorerPage';
 import PredictorPage from './pages/PredictorPage';
 import NetworkPage from './pages/NetworkPage';
 
-// Optional: Import a Footer component if you create one
-// import Footer from './components/Footer';
-
 function App() {
+  const [backendPort, setBackendPort] = useState(null);
+
+  const handlePortSelect = (port) => {
+    setBackendPort(port);
+    // Update the API URL in the environment
+    window.localStorage.setItem('BACKEND_PORT', port);
+    window.REACT_APP_API_URL = `http://localhost:${port}`;
+    console.log('Backend URL set to:', window.REACT_APP_API_URL);
+  };
+
+  if (!backendPort) {
+    return <PortSelector onPortSelect={handlePortSelect} />;
+  }
+
   return (
     <Router>
-      <div className="App"> {/* Main container for styling */} 
+      <div className="App">
         <Navbar />
-        <main className="main-content"> {/* Wrapper for page content */} 
+        <main className="main-content">
           <Routes>
             <Route path="/" element={<HomePage />} />
             <Route path="/explorer" element={<ExplorerPage />} />
             <Route path="/predictor" element={<PredictorPage />} />
             <Route path="/network" element={<NetworkPage />} />
-            {/* Add other routes here if needed in the future */}
           </Routes>
         </main>
-        {/* Optional: Add a Footer component here */}
-        {/* <Footer /> */}
       </div>
     </Router>
   );

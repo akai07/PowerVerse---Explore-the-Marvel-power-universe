@@ -1,26 +1,54 @@
 import pandas as pd
-from flask import Flask, jsonify
+from flask import Flask, jsonify, request
 from flask_cors import CORS
 import os
+import sys
+import json
+import datetime
+import socket
 from urllib.parse import quote as url_quote
+
+# Add the project root to the Python path to import from src
+script_dir = os.path.dirname(os.path.abspath(__file__))
+project_root = os.path.dirname(script_dir) # Go up one level from 'src'
+sys.path.append(project_root)
+
+# Import the power predictor model
+from src.models.power_predictor import PowerPredictor
 
 app = Flask(__name__)
 CORS(app)  # Enable CORS for all routes
 
 # Construct the absolute path to the CSV file
-# Assuming the script is run from the project root or the 'src' directory
-script_dir = os.path.dirname(os.path.abspath(__file__))
-project_root = os.path.dirname(script_dir) # Go up one level from 'src'
-data_path = os.path.join(project_root, 'data', 'marvel_characters_dataset.csv')
+marvel_data_path = os.path.join(project_root, 'data', 'Marvels - 2 (1).csv')
 
 # Load the dataset
 try:
-    df = pd.read_csv(data_path)
+    df = pd.read_csv(marvel_data_path)
     # Basic data cleaning: fill NaN values with empty strings or appropriate defaults
     df.fillna('', inplace=True)
+    print(f"Successfully loaded Marvel dataset with {len(df)} characters")
 except FileNotFoundError:
-    print(f"Error: Could not find the dataset at {data_path}")
+    print(f"Error: Could not find the dataset at {marvel_data_path}")
     df = pd.DataFrame() # Create an empty DataFrame if file not found
+
+# Initialize the power predictor model
+power_predictor = PowerPredictor()
+
+# Train the model if data is available
+if not df.empty:
+    try:
+        # Add a temporary Estimated_Power_Level column for training
+        # In a real app, this would come from actual data
+        df['Estimated_Power_Level'] = 'Medium'  # Default value
+        df.loc[df['Hero/Villain'].str.contains('Hero', na=False), 'Estimated_Power_Level'] = 'High'
+        df.loc[df['Hero/Villain'].str.contains('Villain', na=False), 'Estimated_Power_Level'] = 'Medium'
+        
+        # Train the model
+        metrics = power_predictor.train(df)
+        print(f"Power predictor model trained successfully. R² score: {metrics['r2']:.2f}")
+    except Exception as e:
+        print(f"Error training power predictor model: {e}")
 
 @app.route('/api/characters', methods=['GET'])
 def get_characters():
@@ -32,9 +60,94 @@ def get_characters():
     characters_list = df.to_dict(orient='records')
     return jsonify(characters_list)
 
+# Create a directory for storing fetched data
+data_storage_dir = os.path.join(project_root, 'data', 'fetched_data')
+os.makedirs(data_storage_dir, exist_ok=True)
+
+# Function to store fetched data
+def store_fetched_data(data_source, data):
+    """Store fetched data with timestamp for future use"""
+    timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
+    filename = f"{data_source}_{timestamp}.json"
+    filepath = os.path.join(data_storage_dir, filename)
+    
+    with open(filepath, 'w') as f:
+        json.dump(data, f, indent=2)
+    
+    print(f"Stored fetched data from {data_source} at {filepath}")
+    return filepath
+
+@app.route('/api/status', methods=['GET'])
+def api_status():
+    """API endpoint to check backend connectivity"""
+    return jsonify({
+        "status": "online",
+        "timestamp": datetime.datetime.now().isoformat(),
+        "dataLoaded": not df.empty,
+        "characterCount": len(df) if not df.empty else 0
+    })
+
+@app.route('/api/predict-power', methods=['POST'])
+def predict_power():
+    """API endpoint to predict character power level."""
+    data = request.json
+    
+    if not data:
+        return jsonify({"error": "No data provided."}), 400
+    
+    try:
+        # Get character attributes from request
+        hero_villain = data.get('heroVillain', 'Hero')
+        estimated_power_level = data.get('estimatedPowerLevel', 'Medium')
+        
+        # Predict power level
+        power_level = power_predictor.predict_power_level(hero_villain, estimated_power_level)
+        
+        # Store the prediction request and result
+        store_data = {
+            "request": data,
+            "result": {
+                "powerLevel": float(power_level),
+                "powerCategory": get_power_category(power_level)
+            },
+            "timestamp": datetime.datetime.now().isoformat()
+        }
+        store_fetched_data("power_prediction", store_data)
+        
+        return jsonify({
+            "powerLevel": float(power_level),
+            "powerCategory": get_power_category(power_level)
+        })
+    except Exception as e:
+        return jsonify({"error": f"Error predicting power level: {str(e)}"}), 500
+
+def get_power_category(power_level):
+    """Categorize power level into Low, Medium, or High."""
+    if power_level >= 8:
+        return "High"
+    elif power_level >= 5:
+        return "Medium"
+    else:
+        return "Low"
+
+def find_available_port(start_port=8000, max_attempts=10):
+    """Find an available port starting from start_port."""
+    for port in range(start_port, start_port + max_attempts):
+        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+            try:
+                s.bind(('0.0.0.0', port))
+                return port
+            except socket.error:
+                continue
+    return None
+
 if __name__ == '__main__':
-    # Use 0.0.0.0 to make the server accessible externally if needed,
-    # otherwise use 127.0.0.1 for local access only.
-    # Debug=True enables auto-reloading and provides more detailed error messages.
-    # Set debug=False for production.
-    app.run(host='0.0.0.0', port=5001, debug=True)
+    default_port = 8000
+    port = find_available_port(default_port)
+    
+    if port is None:
+        print(f"Error: Could not find an available port after trying {max_attempts} ports starting from {default_port}")
+        sys.exit(1)
+    
+    print(f"Starting PowerVerse API server on 0.0.0.0:{port}")
+    app.run(host='0.0.0.0', port=port, debug=False)
