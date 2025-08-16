@@ -116,37 +116,101 @@ function PredictorPage() {
   return (
     <div className="page-container predictor-page">
       <BackendStatus />
-      <div className="predictor-header">
-        <h1>Marvel Power Predictor</h1>
-        <p className="description">
-          Explore the power levels of Marvel characters and predict how powerful your custom character would be!
-        </p>
+      
+      {/* Hero Section */}
+      <div className="predictor-hero">
+        <div className="hero-content">
+          <h1 className="hero-title">
+            <span className="title-main">Marvel Power</span>
+            <span className="title-accent">Predictor</span>
+          </h1>
+          <p className="hero-description">
+            Harness the power of AI to analyze Marvel characters and predict the strength of your custom heroes!
+          </p>
+          <div className="hero-stats">
+            <div className="stat-item">
+              <span className="stat-number">{characters.length}</span>
+              <span className="stat-label">Characters</span>
+            </div>
+            <div className="stat-item">
+              <span className="stat-number">∞</span>
+              <span className="stat-label">Possibilities</span>
+            </div>
+            <div className="stat-item">
+              <span className="stat-number">AI</span>
+              <span className="stat-label">Powered</span>
+            </div>
+          </div>
+        </div>
+        <div className="hero-visual">
+          <div className="power-orb">
+            <div className="orb-core"></div>
+            <div className="orb-ring ring-1"></div>
+            <div className="orb-ring ring-2"></div>
+            <div className="orb-ring ring-3"></div>
+          </div>
+        </div>
       </div>
       
-      {loading && <div className="loading-state">Loading character data...</div>}
-      {error && <div className="error-state">{error}</div>}
+      {loading && (
+        <div className="loading-container">
+          <div className="loading-spinner"></div>
+          <p className="loading-text">Analyzing Marvel Universe...</p>
+        </div>
+      )}
+      
+      {error && (
+        <div className="error-container">
+          <div className="error-icon">⚠️</div>
+          <h3 className="error-title">Connection Error</h3>
+          <p className="error-message">{error}</p>
+          <button className="retry-button" onClick={() => window.location.reload()}>
+            Try Again
+          </button>
+        </div>
+      )}
       
       {!loading && !error && (
         <div className="predictor-content">
-          {/* Show character comparison if both characters are selected */}
+          {/* Character Comparison Modal */}
           {selectedCharacter && comparisonCharacter && (
-            <CharacterComparison
-              character1={selectedCharacter}
-              powerLevel1={powerLevel}
-              character2={comparisonCharacter}
-              powerLevel2={comparisonCharacter.powerLevel}
-              onClose={handleCloseComparison}
-            />
+            <div className="comparison-modal">
+              <div className="modal-backdrop" onClick={handleCloseComparison}></div>
+              <div className="modal-content">
+                <button className="modal-close" onClick={handleCloseComparison}>×</button>
+                <CharacterComparison
+                  character1={selectedCharacter}
+                  powerLevel1={powerLevel}
+                  character2={comparisonCharacter}
+                  powerLevel2={comparisonCharacter.powerLevel}
+                  onClose={handleCloseComparison}
+                />
+              </div>
+            </div>
           )}
           
-          <div className="search-section">
-            <input
-              type="text"
-              placeholder="Search for a character..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="search-input"
-            />
+          {/* Character Selection Section */}
+          <section className="character-selection">
+            <div className="section-header">
+              <h2 className="section-title">Choose Your Character</h2>
+              <p className="section-description">Select a Marvel character to analyze their power level</p>
+            </div>
+            
+            <div className="search-container">
+              <div className="search-wrapper">
+                <input
+                  type="text"
+                  placeholder="Search characters by name or alias..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="search-input"
+                />
+                <div className="search-icon">🔍</div>
+              </div>
+              <div className="search-results-count">
+                {filteredCharacters.length} character{filteredCharacters.length !== 1 ? 's' : ''} found
+              </div>
+            </div>
             
             <div className="character-grid">
               {filteredCharacters.length > 0 ? (
@@ -159,118 +223,166 @@ function PredictorPage() {
                     <CharacterCard 
                       character={char} 
                       powerLevel={calculatePowerLevel(char)}
-                      showPower={false}
-                      className="grid-character-card"
+                      viewMode="grid"
                     />
+                    {selectedCharacter === char && (
+                      <div className="selection-indicator">
+                        <span className="checkmark">✓</span>
+                      </div>
+                    )}
                   </div>
                 ))
               ) : (
-                <p>No characters found matching your search.</p>
+                <div className="no-results">
+                  <div className="no-results-icon">🔍</div>
+                  <h3>No Characters Found</h3>
+                  <p>Try adjusting your search terms</p>
+                </div>
               )}
             </div>
-          </div>
+          </section>
           
-          <div className="character-details">
-            {selectedCharacter ? (
-              <div className="selected-character">
-                <CharacterCard 
-                  character={selectedCharacter} 
-                  powerLevel={powerLevel} 
-                  className="selected-character-card"
-                />
+          {/* Selected Character Analysis */}
+          {selectedCharacter && (
+            <section className="character-analysis">
+              <div className="section-header">
+                <h2 className="section-title">Power Analysis</h2>
+                <p className="section-description">Detailed breakdown of {selectedCharacter['Superhero Identity'] || selectedCharacter.Alias}'s abilities</p>
+              </div>
+              
+              <div className="analysis-content">
+                <div className="character-showcase">
+                  <CharacterCard 
+                    character={selectedCharacter} 
+                    powerLevel={powerLevel}
+                    viewMode="grid"
+                  />
+                  
+                  <div className="power-breakdown">
+                    <h3>Power Level: {powerLevel}/10</h3>
+                    <div className="power-meter-large">
+                      <div 
+                        className="power-fill-large"
+                        style={{ 
+                          width: `${powerLevel * 10}%`, 
+                          backgroundColor: getPowerColor(powerLevel) 
+                        }}
+                      ></div>
+                    </div>
+                    
+                    <div className="power-category">
+                      {powerLevel >= 8 && <span className="category high">🔥 Cosmic Level</span>}
+                      {powerLevel >= 6 && powerLevel < 8 && <span className="category medium">⚡ Enhanced</span>}
+                      {powerLevel >= 4 && powerLevel < 6 && <span className="category normal">👤 Human+</span>}
+                      {powerLevel < 4 && <span className="category low">🛡️ Tactical</span>}
+                    </div>
+                  </div>
+                </div>
                 
-                {!comparisonCharacter && (
+                <div className="analysis-actions">
                   <button 
-                    className="comparison-button"
+                    className="action-button primary"
                     onClick={() => {
-                      // Find a random character to compare with
                       const randomIndex = Math.floor(Math.random() * Math.min(characters.length, 50));
                       handleComparisonSelect(characters[randomIndex]);
                     }}
                   >
-                    Compare with Random Character
+                    🆚 Compare Powers
                   </button>
-                )}
-              </div>
-            ) : (
-              <div className="no-selection">
-                <p>Select a character to see their details and predicted power level.</p>
-              </div>
-            )}
-          </div>
-          
-          <div className="custom-predictor">
-            <h2>Create Your Own Hero</h2>
-            <p>Adjust the attributes below to see how powerful your custom character would be.</p>
-            
-            <div className="attributes-sliders">
-              {Object.entries(powerAttributes).map(([attribute, value]) => (
-                <div key={attribute} className="attribute-slider">
-                  <label htmlFor={attribute}>
-                    {attribute.charAt(0).toUpperCase() + attribute.slice(1)}: {value}
-                  </label>
-                  <input
-                    type="range"
-                    id={attribute}
-                    min="1"
-                    max="10"
-                    value={value}
-                    onChange={(e) => handleAttributeChange(attribute, e.target.value)}
-                  />
+                  
+                  <button className="action-button secondary">
+                    📊 View Stats
+                  </button>
+                  
+                  <button className="action-button secondary">
+                    🔗 Learn More
+                  </button>
                 </div>
-              ))}
+              </div>
+            </section>
+          )}
+          
+          {/* Custom Character Creator */}
+          <section className="custom-creator">
+            <div className="section-header">
+              <h2 className="section-title">Create Your Hero</h2>
+              <p className="section-description">Design your own character and predict their power level using AI</p>
             </div>
             
-            <div className="custom-power-level">
-              <h3>Predicted Power Level: {predictCustomPowerLevel()}</h3>
-              <div className="power-bar">
-                <div 
-                  className="power-fill"
-                  style={{ 
-                    width: `${predictCustomPowerLevel() * 10}%`, 
-                    backgroundColor: getPowerColor(predictCustomPowerLevel()) 
-                  }}
-                ></div>
-              </div>
-            </div>
-          </div>
-          
-          <div className="character-comparison-section">
-            <h2>Character Comparison</h2>
-            <p>Compare your selected character with another Marvel character.</p>
-            
-            {selectedCharacter ? (
-              <div className="comparison-selection">
-                <div className="selected-for-comparison">
-                  <h3>Selected: {selectedCharacter['Superhero Identity'] || selectedCharacter.Alias}</h3>
-                  <p>Power Level: {powerLevel}</p>
+            <div className="creator-content">
+              <div className="attributes-panel">
+                <h3>Character Attributes</h3>
+                <div className="attributes-grid">
+                  {Object.entries(powerAttributes).map(([attribute, value]) => (
+                    <div key={attribute} className="attribute-control">
+                      <div className="attribute-header">
+                        <label className="attribute-label">
+                          {attribute.charAt(0).toUpperCase() + attribute.slice(1).replace(/([A-Z])/g, ' $1')}
+                        </label>
+                        <span className="attribute-value">{value}</span>
+                      </div>
+                      <input
+                        type="range"
+                        min="1"
+                        max="10"
+                        value={value}
+                        onChange={(e) => handleAttributeChange(attribute, e.target.value)}
+                        className="attribute-slider"
+                        style={{
+                          background: `linear-gradient(to right, var(--accent-primary) 0%, var(--accent-primary) ${value * 10}%, rgba(255,255,255,0.1) ${value * 10}%, rgba(255,255,255,0.1) 100%)`
+                        }}
+                      />
+                      <div className="attribute-markers">
+                        {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(mark => (
+                          <div key={mark} className={`marker ${value >= mark ? 'active' : ''}`}></div>
+                        ))}
+                      </div>
+                    </div>
+                  ))}
                 </div>
-                
-                {!comparisonCharacter ? (
-                  <div className="comparison-instructions">
-                    <p>Search and select another character above to compare power levels</p>
-                    <p>Or choose from popular characters:</p>
-                    <div className="popular-characters">
-                      {characters.slice(0, 5).map((char, idx) => (
-                        <button 
-                          key={idx} 
-                          className="comparison-button"
-                          onClick={() => handleComparisonSelect(char)}
-                          disabled={selectedCharacter === char}
-                        >
-                          {char['Superhero Identity'] || char.Alias}
-                        </button>
-                      ))}
+              </div>
+              
+              <div className="prediction-panel">
+                <div className="custom-character-card">
+                  <div className="character-avatar">
+                    <div className="avatar-placeholder">
+                      <span className="avatar-icon">🦸</span>
                     </div>
                   </div>
-                ) : null}
+                  
+                  <div className="character-info">
+                    <h3 className="character-name">Your Hero</h3>
+                    <p className="character-type">Custom Character</p>
+                  </div>
+                  
+                  <div className="predicted-power">
+                    <h4>Predicted Power Level</h4>
+                    <div className="power-display">
+                      <span className="power-number">{predictCustomPowerLevel()}</span>
+                      <span className="power-max">/10</span>
+                    </div>
+                    
+                    <div className="power-bar-custom">
+                      <div 
+                        className="power-fill-custom"
+                        style={{ 
+                          width: `${predictCustomPowerLevel() * 10}%`, 
+                          backgroundColor: getPowerColor(predictCustomPowerLevel()) 
+                        }}
+                      ></div>
+                    </div>
+                    
+                    <div className="power-description">
+                      {predictCustomPowerLevel() >= 8 && "Your hero rivals cosmic entities!"}
+                      {predictCustomPowerLevel() >= 6 && predictCustomPowerLevel() < 8 && "A formidable superhero with enhanced abilities!"}
+                      {predictCustomPowerLevel() >= 4 && predictCustomPowerLevel() < 6 && "A capable hero with above-average powers!"}
+                      {predictCustomPowerLevel() < 4 && "A tactical hero who relies on skill and strategy!"}
+                    </div>
+                  </div>
+                </div>
               </div>
-            ) : (
-              <div className="no-selection-message">
-                <p>First select a character from the list above to enable comparison.</p>
-              </div>
-            )}
-          </div>
+            </div>
+          </section>
         </div>
       )}
     </div>

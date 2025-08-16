@@ -1,0 +1,15 @@
+{
+  "request": {
+    "strength": 3,
+    "speed": 4,
+    "durability": 2,
+    "intelligence": 8,
+    "energy_projection": 3,
+    "fighting_skills": 2
+  },
+  "result": {
+    "powerLevel": 3.833333333333333,
+    "powerCategory": "Low"
+  },
+  "timestamp": "2025-08-16T06:03:01.137304"
+}

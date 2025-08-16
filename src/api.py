@@ -89,19 +89,46 @@ def api_status():
 
 @app.route('/api/predict-power', methods=['POST'])
 def predict_power():
-    """API endpoint to predict character power level."""
-    data = request.json
-    
-    if not data:
-        return jsonify({"error": "No data provided."}), 400
-    
+    """Predict power level based on character attributes."""
     try:
-        # Get character attributes from request
-        hero_villain = data.get('heroVillain', 'Hero')
-        estimated_power_level = data.get('estimatedPowerLevel', 'Medium')
+        data = request.get_json()
         
-        # Predict power level
-        power_level = power_predictor.predict_power_level(hero_villain, estimated_power_level)
+        # Check if we have numerical attributes (new format)
+        if all(key in data for key in ['strength', 'speed', 'durability', 'intelligence', 'energy_projection', 'fighting_skills']):
+            # Calculate power level from numerical attributes
+            attributes = {
+                'strength': data.get('strength', 5),
+                'speed': data.get('speed', 5),
+                'durability': data.get('durability', 5),
+                'intelligence': data.get('intelligence', 5),
+                'energy_projection': data.get('energy_projection', 5),
+                'fighting_skills': data.get('fighting_skills', 5)
+            }
+            
+            # Calculate weighted average (intelligence and strength have higher weight)
+            weights = {
+                'strength': 1.2,
+                'speed': 1.0,
+                'durability': 1.1,
+                'intelligence': 1.3,
+                'energy_projection': 1.1,
+                'fighting_skills': 0.9
+            }
+            
+            weighted_sum = sum(attributes[attr] * weights[attr] for attr in attributes)
+            total_weight = sum(weights.values())
+            power_level = (weighted_sum / total_weight)
+            
+            # Ensure power level is within 1-10 range
+            power_level = max(1, min(10, power_level))
+            
+        else:
+            # Legacy format with categorical data
+            hero_villain = data.get('heroVillain', 'Hero')
+            estimated_power_level = data.get('estimatedPowerLevel', 'Medium')
+            
+            # Predict power level using the trained model
+            power_level = power_predictor.predict_power_level(hero_villain, estimated_power_level)
         
         # Store the prediction request and result
         store_data = {
