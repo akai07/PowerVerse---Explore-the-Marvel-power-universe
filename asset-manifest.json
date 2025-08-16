@@ -1,0 +1,13 @@
+{
+  "files": {
+    "main.css": "/PowerVerse---Explore-the-Marvel-power-universe/static/css/main.3afb4458.css",
+    "main.js": "/PowerVerse---Explore-the-Marvel-power-universe/static/js/main.8768e34e.js",
+    "index.html": "/PowerVerse---Explore-the-Marvel-power-universe/index.html",
+    "main.3afb4458.css.map": "/PowerVerse---Explore-the-Marvel-power-universe/static/css/main.3afb4458.css.map",
+    "main.8768e34e.js.map": "/PowerVerse---Explore-the-Marvel-power-universe/static/js/main.8768e34e.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.3afb4458.css",
+    "static/js/main.8768e34e.js"
+  ]
+}
